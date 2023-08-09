@@ -102,6 +102,12 @@ F = x0^8*x1^2+x0^9+x1^9+x0^3*x1^3
 F = x0^10+x0^5*x1^5+x0^8+x1^8+x0^3*x1^3
 F = x0^5*x1^5+x0^9+x1^9+x0^6+x0^3*x1^3
 F =  x0^9 + x0^3*x1^4 + x1^7 + x0^4*x1^2
+F = x1^10 + x0^3*x1^4 + x0^6 + x0^4*x1
+F =  x0^3*x2^3 + x0^6*x2^4 + x0^4*x2^5
+F = x1^10 + x1^4*x2^3 + x2^4 +x1*x2^5
+F = x0^8* x1 +x0^3 * x1^4+x0^6+x1^5
+F = x0^8 *x2+x0^3 * x2^3+x0^6* x2^4+x2^5
+F =  x1 *x2+ x1^4* x2^3+x2^4+x1^5 *x2^5
 Fperp = inverseSystem F
 S/Fperp
 H = apply(11, k -> hilbertFunction(k,S/Fperp))
@@ -114,7 +120,10 @@ F = x0^5*x1^5+x0^9*x2+x1^9*x2+x0^3*x1^3*x2^4+x2^10
 F = x0^10+x0^5*x1^5+x0^8*x2^2+x1^8*x2^2+x0^3*x1^3*x2^4+x2^10
 F = x0^5*x1^5+x0^9*x2+x1^9*x2+x0^6*x2^4+x0^3*x1^3*x2^4+x2^10+3
 F =  x0^9*x2 + x0^3*x1^4*x2^3 + x1^7*x2^3 + x0^4*x1^2*x2^4 + x2^10
+F = (x1^10 + x0^3*x1^4*x2^3 + x0^6*x2^4 + x0^4*x1*x2^5 )*x2^(17)
+F = x0^8* x1 *x2+x0^3 * x1^4* x2^3+x0^6* x2^4+x1^5 *x2^5
 Fperp = inverseSystem F
+betti Fperp
 H = apply(12, k -> hilbertFunction(k,S/Fperp))
 sum H
 
@@ -350,75 +359,64 @@ apply(11, k -> hilbertFunction(k,Fperp))
 
 
 -- BUCHSBAUM EISENBUD
-S = Proj(QQ[x0,x1,x2])
-F = x0^5*x1^5 + x0^5 *x2^5 + x1^5*x2^5 + x0^4*x1^3*x2^3 --+ x0^3*x1^3*x2^4
+S = Proj(ZZ/32003[x0,x1,x2])
+--F = x0^5*x1^5 + x0^5 *x2^5 + x1^5*x2^5 + x0^4*x1^3*x2^3 --+ x0^3*x1^3*x2^4
+F = x0^8* x1* x2+x0^3* x1^4 * x2^3+x0^6* x2^4+x1^5* x2^5
+F = x0^8* x2^2+x1^8 *x2^2+x0^3* x1^4* x2^3+x0^4* x1* x2^5 -- VERY CLOSE
+F= x0^9* x2+x0^3* x1^4* x2^3+x1^6* x2^4+x0^4* x1* x2^5
+F = x1^(10)+x0^3 * x1^4 * x2^3+x0^6 *x2^4+x0^4 *x1* x2^5 -- YAY
 Fperp = inverseSystem F
 betti res Fperp
 M = res Fperp
 M.dd
-M.dd_2
+B = M.dd_2
 rank M.dd_2
---resBE M.dd_2
--- betti res I
--- resBe
---
+--loadPackage "ResLengthThree"
+A=resLengthThreeAlg M -- define the algebra
+netList multTableOneTwo A -- this presents the multiplication table in readable form
+-- we need to cut out the first row and column to get a matrix corresponding to the multiplication
+H=sub(((matrix((multTableOneTwo(A))_{1..13}))_{1..13}), g_1=>1)
+X=transpose(H)*B -- this is I think the skew-symmetric matrix corresponding to B after the change of basis described above
+print X
+--print (X*50*50*9*2*500)
+--print (X*50 * (1/27))
+
+-- Extracting matrix to the left of zero-block
+subM = X^{7,8,9,10,11,12}_{0,1,2,3,4,5,6}
+myIdeal = pfaffians(6,subM)
+v = variety myIdeal
+v2 = Proj(S/myIdeal)
+dim v
+degree v
+apply(11, k -> hilbertFunction(k,A/myIdeal))
 
 
 kk=QQ[x,y,z]
-J = inverseSystem(x^6+y^6+z^6)
+Fperp = inverseSystem(x^6+y^6+z^6)
 mat = matrix{{hilbertFunction(0,J),hilbertFunction(1,J),hilbertFunction(2,J),hilbertFunction(3,J),hilbertFunction(4,J),hilbertFunction(5,J)}}
-betti res J
-M=res J
+betti res Fperp
+J=res Fperp
 
-M.dd
-K = M.dd_2
+J.dd
+B = J.dd_2
 --resBE(K)
 
 -- TO LOAD THESE METHODS:
 -- load "apolar.m2"
-testModulesForDeg17CY = (N,k,p) -> (
-    x:=symbol x;R:=(ZZ/p)[x_0..x_6];
-    numberOfGoodModules:=0;i:=0;
-    usedTime:=timing while (i<N) do (
-        b:=random(R^3,R^{16:-1});
-        --we put SyzygyLimit=>60 because we expect
-        --k<16 syzygies, so 16+28+k<=60
-        fb:=res(coker b,
-            DegreeLimit =>0,SyzygyLimit=>60,LengthLimit =>3);
-        if rank fb_3>=k and (dim coker b)==0 then (
-            fb=res(coker b, DegreeLimit =>0,LengthLimit =>4);
-            if rank fb_4==0
-            then numberOfGoodModules=numberOfGoodModules+1;);
-        i=i+1;);
-    collectGarbage();
-    timeForNModules:=usedTime#0;
-    {timeForNModules,numberOfGoodModules});
 
-randomModuleForDeg17CY = (k,R) -> (
-    isGoodModule:=false;i:=0;
-    while not isGoodModule do (
-        b:=random(R^3,R^{16:-1});
-        --we put SyzygyLimit=>60 because we expect
-        --k<16 syzygies, so 16+28+k<=60
-        fb:=res(coker b,
-            DegreeLimit =>0,SyzygyLimit=>60,LengthLimit =>3);
-        if rank fb_3>=k and (dim coker b)==0 then (
-            fb=res(cokEr b, DegreeLimit =>0,LengthLimit =>4);
-            if rank fb_4==0 then isGoodModule=true;);
-        i=i+1;);
-    <<" -- Trial n. " << i <<", k="<< rank fb_3 <<endl;
-    b);
 
-skewSymMorphismsForDeg17CY = (b) -> (
-    --we create a parameter ring for the morphisms:
-    K:=coefficientRing ring b;
-    u:=symbol u;
-    U:=K[u_0..u_(binomial(6,2)-1)];
-    --now we compute the equations for the u_i’s:
-    UU:=U**ring b;
-    equationsInUU:=flatten (substitute(b,UU)*
-        substitute(genericSkewMatrix(U,u_0,6),UU));
-    uu:=substitute(vars U,UU);
-    equations:=substitute(
-        diff(uu,transpose equationsInUU),ring b);
-    syz(equations,DegreeLimit =>0));
+
+
+R=ZZ/5[x1,x2,z3,x4]
+T=random(R^5, R^{5:-1})
+N=T-transpose T
+I=pfaffians(4,N)
+J=resolution I -- I start with a pfaffian resolution
+B=J.dd_2 -- here I lost skew symmetry of the middle matrix
+
+A=resLengthThreeAlg J -- define the algebra
+netList multTableOneTwo A -- this presents the multiplication table in readable form
+-- we need to cut out the first row and column to get a matrix corresponding to the multiplication
+H=sub(((matrix((multTableOneTwo(A))_{1..5}))_{1..5}), g_1=>1)
+X=transpose(H)*B -- this is I think the skew-symmetric matrix corresponding to B after the change of basis described above
+print X
