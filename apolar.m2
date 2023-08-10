@@ -470,15 +470,15 @@ polyHasDim22 = (F) -> (
     some := ((matrix((multTableOneTwo(A))_{1..13}))_{1..13});
     H:=sub(some, g_1=>1);
     X:=transpose(H)*B;
-    zeroMatrix := matrix{{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0}};
-    subM := X^{7..12}_{0..6};
-    if (subM ==  zeroMatrix) then
+    potZero := X^{7..12}_{7..12};
+    if (potZero ==  0) then
     (
+        subM := X^{7..12}_{0..6};
         print "Zero block found!";
         print F;
         myIdeal := minors(6,subM);
         use S;
-        myIdeal := substitute(myIdeal, S);
+        myIdeal = substitute(myIdeal, S);
         v := variety myIdeal;
         if (degree v == 22) then return true;
     )
@@ -488,15 +488,15 @@ polyHasDim22 = (F) -> (
 proc = () -> (
         d := 10;
         S = QQ[x0,x1];
-        for j from 3 to (d-1) list
+        for j from 2 to (d-1) list
         (
-            for k from 4 to (d-1) list
+            for k from 2 to (d-1) list
             (
-                spice := {x0^(j)*x1^(k) , x0^(k)*x1^5};
+                spice := {x0^(j)*x1^(k) ,x0^3*x1^4};
                 pols := findPolys(d, spice);
                 print("number of polynomials with natural rank 22 to analyze:" | toString(length pols));
                 S = QQ[x0,x1,x2];
-                g := {x0^(j)*x1^(k) , x0^k*x1^5};
+                g := {x0^(j)*x1^(k) , x0^3*x1^4};
                 special := apply(pols, p -> specialize p);
                 homs := apply(special, s -> getHomPoly(s, g));
                 num := length pols - 1;
