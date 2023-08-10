@@ -13,13 +13,13 @@ R = ZZ[x,y,z, MonomialOrder => Lex]
 -- shift + f11 to evaluate expression
 
 
-g_1 = x^2 + y^2 + z^2 - 4
-g_2 = x^2 + 2* y^2 - 5
-g_3 = x*z - 1 
+--g_1 = x^2 + y^2 + z^2 - 4
+--g_2 = x^2 + 2* y^2 - 5
+--g_3 = x*z - 1
 
-I = ideal (g_1, g_2, g_3)
+--I = ideal (g_1, g_2, g_3)
 
-G = gens gb I
+--G = gens gb I
 
 
 
@@ -101,13 +101,13 @@ S = QQ[x0,x1]
 F = x0^8*x1^2+x0^9+x1^9+x0^3*x1^3
 F = x0^10+x0^5*x1^5+x0^8+x1^8+x0^3*x1^3
 F = x0^5*x1^5+x0^9+x1^9+x0^6+x0^3*x1^3
-F =  x0^9 + x0^3*x1^4 + x1^7 + x0^4*x1^2
+F = x0^9 + x0^3*x1^4 + x1^7 + x0^4*x1^2
 F = x1^10 + x0^3*x1^4 + x0^6 + x0^4*x1
-F =  x0^3*x2^3 + x0^6*x2^4 + x0^4*x2^5
-F = x1^10 + x1^4*x2^3 + x2^4 +x1*x2^5
-F = x0^8* x1 +x0^3 * x1^4+x0^6+x1^5
-F = x0^8 *x2+x0^3 * x2^3+x0^6* x2^4+x2^5
-F =  x1 *x2+ x1^4* x2^3+x2^4+x1^5 *x2^5
+--F = x0^3*x2^3 + x0^6*x2^4 + x0^4*x2^5
+--F = x1^10 + x1^4*x2^3 + x2^4 +x1*x2^5
+--F = x0^8* x1 +x0^3 * x1^4+x0^6+x1^5
+--F = x0^8 *x2+x0^3 * x2^3+x0^6* x2^4+x2^5
+--F =  x1 *x2+ x1^4* x2^3+x2^4+x1^5 *x2^5
 Fperp = inverseSystem F
 S/Fperp
 H = apply(11, k -> hilbertFunction(k,S/Fperp))
@@ -197,15 +197,14 @@ getSinglePolyFromList = (l) -> (
         var);
 
 -- input deg d
-findPolys = (d) -> (
+findPolys = (d, g) -> (
     var := ();
     numPartDiff := ceiling (binomial(2+d, 2)/3);
-    print numPartDiff;
     for i from 0 to d list -- 0 to 10
     (for j from 0 to d list -- 0 to 10
     (for k from 0 to d list -- 1 to 9
     (for l from 0 to (d-k) list -- 1 to 9
-        if (hilbertSum(x0^i + x1^j + x0^k * x1^l + x0^3*x1^4) ==  numPartDiff)
+        if (hilbertSum(x0^i + x1^j + x0^k * x1^l + g_0 + g_1) ==  numPartDiff)
         then var = append(var, (i,j,k,l))
         else "")));
     var);
@@ -250,13 +249,14 @@ specialize = A -> (
 
 -- INPUT
  --(0, 0, (0, 0), (3, 7), (4, 6), (2, 3, 5))
-getHomPoly = a -> (
+getHomPoly = (a, g) -> (
     x0^(a_0) +
     x1^(a_1) +
     x0^((a_2)_0) * x1^((a_2)_1) +
     x0^((a_3)_0) * x2^((a_3)_1) +
     x1^((a_4)_0) * x2^((a_4)_1) +
-    x0^((a_5)_0) * x1^((a_5)_1) * x2^((a_5)_2) + x0^3*x1^4*x2^3
+    x0^((a_5)_0) * x1^((a_5)_1) * x2^((a_5)_2) +
+     g_0 * x2^(10 - (degree g_0)_0) + g_1 * x2^(10 - (degree g_1)_0) - 3 -x2^(10)
 
     );
 -- expects (1, 1, 2, 2, 2, 3) tuples
@@ -357,9 +357,29 @@ h = hilbertPolynomial(Fperp)
 apply(11, k -> hilbertFunction(k,Fperp))
 
 
+S = Proj(QQ[x0,x1,x2])
+F = x1^(10)+ x1^4 * x2^3+x2^4+x1* x2^5 -- YAY
+Fperp = inverseSystem F
+FperpHom = homogenize(Fperp,x0)
+print toString(FperpHom)
+apply(11, k -> hilbertFunction(k,Fperp))
+apply(11, k -> hilbertFunction(k,FperpHom))
+
+S = Proj(QQ[x0,x2])
+F = x0^3 * x2^3+x0^6 *x2^4+x0^4* x2^5 -- YAY
+Fperp = inverseSystem F
+--h = hilbertPolynomial(Fperp)
+apply(11, k -> hilbertFunction(k,Fperp))
+
+S = Proj(QQ[x0,x1])
+F = x1^(10)+x0^3 * x1^4 +x0^6 +x0^4 *x1
+Fperp = inverseSystem F
+--h = hilbertPolynomial(Fperp)
+apply(11, k -> hilbertFunction(k,Fperp))
+
 
 -- BUCHSBAUM EISENBUD
-S = Proj(ZZ/32003[x0,x1,x2])
+S = QQ[x0,x1,x2]
 --F = x0^5*x1^5 + x0^5 *x2^5 + x1^5*x2^5 + x0^4*x1^3*x2^3 --+ x0^3*x1^3*x2^4
 F = x0^8* x1* x2+x0^3* x1^4 * x2^3+x0^6* x2^4+x1^5* x2^5
 F = x0^8* x2^2+x1^8 *x2^2+x0^3* x1^4* x2^3+x0^4* x1* x2^5 -- VERY CLOSE
@@ -375,30 +395,25 @@ rank M.dd_2
 A=resLengthThreeAlg M -- define the algebra
 netList multTableOneTwo A -- this presents the multiplication table in readable form
 -- we need to cut out the first row and column to get a matrix corresponding to the multiplication
-H=sub(((matrix((multTableOneTwo(A))_{1..13}))_{1..13}), g_1=>1)
+-- {1..13} removes first row and column
+some = ((matrix((multTableOneTwo(A))_{1..13}))_{1..13})
+-- g_1=>1 replaces placeholder values with 1
+H=sub(some, g_1=>1)
 X=transpose(H)*B -- this is I think the skew-symmetric matrix corresponding to B after the change of basis described above
-print X
+--print X
 --print (X*50*50*9*2*500)
 --print (X*50 * (1/27))
 
 -- Extracting matrix to the left of zero-block
 subM = X^{7,8,9,10,11,12}_{0,1,2,3,4,5,6}
-myIdeal = pfaffians(6,subM)
+myIdeal = minors(6,subM)
+use S;
+myIdeal = substitute(myIdeal, S)
 v = variety myIdeal
-v2 = Proj(S/myIdeal)
 dim v
 degree v
-apply(11, k -> hilbertFunction(k,A/myIdeal))
 
 
-kk=QQ[x,y,z]
-Fperp = inverseSystem(x^6+y^6+z^6)
-mat = matrix{{hilbertFunction(0,J),hilbertFunction(1,J),hilbertFunction(2,J),hilbertFunction(3,J),hilbertFunction(4,J),hilbertFunction(5,J)}}
-betti res Fperp
-J=res Fperp
-
-J.dd
-B = J.dd_2
 --resBE(K)
 
 -- TO LOAD THESE METHODS:
@@ -407,16 +422,98 @@ B = J.dd_2
 
 
 
-R=ZZ/5[x1,x2,z3,x4]
-T=random(R^5, R^{5:-1})
-N=T-transpose T
-I=pfaffians(4,N)
-J=resolution I -- I start with a pfaffian resolution
-B=J.dd_2 -- here I lost skew symmetry of the middle matrix
+--R=ZZ/5[x1,x2,z3,x4]
+--T=random(R^5, R^{5:-1})
+--N=T-transpose T
+--I=pfaffians(4,N)
+--J=resolution I -- I start with a pfaffian resolution
+--B=J.dd_2 -- here I lost skew symmetry of the middle matrix
 
+-- ANNES EKSEMPEL!
+kk=QQ[x,y,z]
+Fperp = inverseSystem(x^6+y^6+z^6)
+betti res Fperp
+J=res Fperp
+J.dd
+B = J.dd_2
 A=resLengthThreeAlg J -- define the algebra
 netList multTableOneTwo A -- this presents the multiplication table in readable form
 -- we need to cut out the first row and column to get a matrix corresponding to the multiplication
 H=sub(((matrix((multTableOneTwo(A))_{1..5}))_{1..5}), g_1=>1)
 X=transpose(H)*B -- this is I think the skew-symmetric matrix corresponding to B after the change of basis described above
-print X
+
+-- NOW I NEED TO MAKE A BASIS CHANGE BACK to the original ring kk
+subM = X^{0,1}_{2,3,4}
+--myIdeal = pfaffians(2,subM)
+myIdeal = minors(2,subM)
+use kk
+myIdeal= substitute(myIdeal, kk)
+v = variety myIdeal
+dim v
+degree v
+
+
+
+
+
+
+-- Full Procedure
+--
+--
+F = x1^(10)+x0^3 * x1^4 * x2^3+x0^6 *x2^4+x0^4 *x1* x2^5 -- YAY
+polyHasDim22 = (F) -> (
+    Fperp := inverseSystem F;
+    M := res Fperp;
+    B := M.dd_2;
+    A := resLengthThreeAlg M;
+    netList multTableOneTwo A;
+    some := ((matrix((multTableOneTwo(A))_{1..13}))_{1..13});
+    H:=sub(some, g_1=>1);
+    X:=transpose(H)*B;
+    zeroMatrix := matrix{{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0}};
+    subM := X^{7..12}_{0..6};
+    if (subM ==  zeroMatrix) then
+    (
+        print "Zero block found!";
+        print F;
+        myIdeal := minors(6,subM);
+        use S;
+        myIdeal := substitute(myIdeal, S);
+        v := variety myIdeal;
+        if (degree v == 22) then return true;
+    )
+    else false;
+    false);
+
+proc = () -> (
+        d := 10;
+        S = QQ[x0,x1];
+        for j from 3 to (d-1) list
+        (
+            for k from 4 to (d-1) list
+            (
+                spice := {x0^(j)*x1^(k) , x0^(k)*x1^5};
+                pols := findPolys(d, spice);
+                print("number of polynomials with natural rank 22 to analyze:" | toString(length pols));
+                S = QQ[x0,x1,x2];
+                g := {x0^(j)*x1^(k) , x0^k*x1^5};
+                special := apply(pols, p -> specialize p);
+                homs := apply(special, s -> getHomPoly(s, g));
+                num := length pols - 1;
+                for i from 0 to num list (
+                    if (maxHilbert(homs_i) == 21) then
+                    (
+                        print "This polynomial has cactus rank ?, natural rank 22, and catalecticant rank 21:";
+                        print toString(homs_i);
+                        -- Any polynomial in here has natural rank 22 and catalecticant rank 21
+                        -- Now we check if the cactus rank is 22 or 21
+                        if (polyHasDim22 homs_i) then
+                        (
+                            print "This polynomial has cactus rank 22, natural rank 22, and catalecticant rank 21:";
+                            print homs_i;
+                            );
+                        );
+                    );
+              );
+        );
+    );
