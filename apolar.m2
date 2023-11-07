@@ -256,7 +256,7 @@ getHomPoly = (a, g) -> (
     x0^((a_3)_0) * x2^((a_3)_1) +
     x1^((a_4)_0) * x2^((a_4)_1) +
     x0^((a_5)_0) * x1^((a_5)_1) * x2^((a_5)_2) +
-     g_0 * x2^(10 - (degree g_0)_0) + g_1 * x2^(10 - (degree g_1)_0) - 3 -x2^(10)
+     g_0 * x2^(10 - (degree g_0)_0) + g_1 * x2^(10 - (degree g_1)_0) - 3
 
     );
 -- expects (1, 1, 2, 2, 2, 3) tuples
@@ -391,7 +391,7 @@ M = res Fperp
 M.dd
 B = M.dd_2
 rank M.dd_2
---loadPackage "ResLengthThree"
+loadPackage "ResLengthThree"
 A=resLengthThreeAlg M -- define the algebra
 netList multTableOneTwo A -- this presents the multiplication table in readable form
 -- we need to cut out the first row and column to get a matrix corresponding to the multiplication
@@ -413,6 +413,104 @@ v = variety myIdeal
 dim v
 degree v
 
+
+-- GRASSMANIAN APPROACH
+S = QQ[x0,x1,x2]
+F = x1^(10)+x0^3 * x1^4 * x2^3+x0^6 *x2^4+x0^4 *x1* x2^5 -- YAY
+F = x0^8* x1* x2+x0^3* x1^4 * x2^3+x0^6* x2^4+x1^5* x2^5
+Fperp = inverseSystem F
+betti res Fperp
+M = res Fperp
+M.dd
+B = M.dd_2
+
+-- simple
+S = QQ[x0,x1,x2]
+m = 9; -- number of rows
+n = 9; --number of columns
+T=random(S^m, S^{n:-1}) -- {a:-b} means a cols, degree b
+B=T-transpose T
+
+numVars = 4*5
+R = QQ[c,a_0..a_numVars, MonomialOrder=>Lex]
+eqM = matrix{{1,0,0,0,a_0,  a_1,  a_2,  a_3, a_4},
+             {0,1,0,0,a_5,  a_6,  a_7,  a_8, a_9},
+             {0,0,1,0,a_10, a_11, a_12, a_13, a_14},
+             {0,0,0,1,a_15, a_16, a_17, a_18, a_19}}
+B0 = sub(sub(sub(sub(B, x1=>0), x2=>0), x0=>1), QQ)
+B1 = sub(sub(sub(sub(B, x0=>0), x2=>0), x1=>1), QQ)
+B2 = sub(sub(sub(sub(B, x1=>0), x0=>0), x2=>1), QQ)
+
+B0 + B1 + B2  -- Checking that decomp works
+eqs = {}
+for i from 0 to 3 list
+(
+    for j from (i+1) to 3 list
+    (
+        eqs = append(eqs,eqM^{i} * B0 * transpose(eqM^{j}));
+        eqs = append(eqs,eqM^{i} * B1 * transpose(eqM^{j}));
+        eqs = append(eqs,eqM^{i} * B2 * transpose(eqM^{j}));
+    )
+)
+eqs
+
+I = ideal(eqs)
+dim I
+v = variety(I)
+degree v
+dim v
+
+-- Starting with matrices
+S = ZZ/2[x0,x1,x2]
+T=random(S^13, S^{13:-1}) -- {a:-b} means a cols, degree b
+S = ZZ[x0,x1,x2]
+
+T = id_()
+
+T = sub(T, S)
+B=T-transpose T
+
+B0 = sub(sub(sub(sub(B, x1=>0), x2=>0), x0=>1), QQ)
+B1 = sub(sub(sub(sub(B, x0=>0), x2=>0), x1=>1), QQ) * 0
+B2 = sub(sub(sub(sub(B, x1=>0), x0=>0), x2=>1), QQ) * 0
+
+R = QQ[b, a_0..a_41]
+eqM = matrix{
+    {0,0,0,0,0,0,a_0, a_1, a_2, a_3, a_4, a_5, a_6 },
+    {0,0,0,0,0,0,a_7, a_8, a_9, a_10,a_11,a_12,a_13},
+    {0,0,0,0,0,0,a_14,a_15,a_16,a_17,a_18,a_19,a_20},
+    {0,0,0,0,0,0,a_21,a_22,a_23,a_24,a_25,a_26,a_27},
+    {0,0,0,0,0,0,a_28,a_29,a_30,a_31,a_32,a_33,a_34},
+    {0,0,0,0,0,0,a_35,a_36,a_37,a_38,a_39,a_40,a_41}
+    }
+eqs = {};
+for i from 0 to 5 list
+(
+    for j from (i+1) to 5 list
+    (
+        eqs = append(eqs,eqM^{i} * B0 * transpose(eqM^{j}));
+        eqs = append(eqs,eqM^{i} * B1 * transpose(eqM^{j}));
+        eqs = append(eqs,eqM^{i} * B2 * transpose(eqM^{j}));
+    )
+)
+
+eqs
+I = ideal(eqs)
+dim I
+
+
+
+rank M.dd_2
+
+A=resLengthThreeAlg M
+netList multTableOneTwo A
+some = ((matrix((multTableOneTwo(A))_{1..13}))_{1..13})
+H=sub(some, g_1=>1)
+X=transpose(H)*B
+
+
+
+Y = substitute(X, R);
 
 --resBE(K)
 
@@ -436,6 +534,7 @@ betti res Fperp
 J=res Fperp
 J.dd
 B = J.dd_2
+
 A=resLengthThreeAlg J -- define the algebra
 netList multTableOneTwo A -- this presents the multiplication table in readable form
 -- we need to cut out the first row and column to get a matrix corresponding to the multiplication
