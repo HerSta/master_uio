@@ -284,13 +284,8 @@ sys = () -> (
         print("number of pols:" | toString(length pols));
         homs := apply(pols, s -> homogenize( s, x2));
         print("number of homs:" | toString(length pols));
-        --print special;
-        --print homs;
         num := length pols - 1;
         for i from 0 to num list (
-                --print( "polynomial:" );
-                --print homs_i;
-                ----print homs_i;
                 --print( "biggest hilbert element:" | toString(maxHilbert(homs_i)));
                 print maxHilbert(homs_i);
                 --
@@ -311,8 +306,6 @@ combo = () -> (
         special := apply(pols, p -> specialize p);
         homs := apply(special, s -> getHomPoly s);
         print("number of homs:" | toString(length pols));
-        --print special;
-        --print homs;
         num := length pols - 1;
         for i from 0 to num list (
                 --print( "polynomial:" );
@@ -321,7 +314,6 @@ combo = () -> (
                 --print( "biggest hilbert element:" | toString(maxHilbert(homs_i)));
                 --print maxHilbert(homs_i);
                 if (maxHilbert(homs_i) == 21) then print toString(homs_i);
-
             )
     );
 
@@ -463,25 +455,38 @@ dim v
 -- Starting with matrices
 S = ZZ/2[x0,x1,x2]
 T=random(S^13, S^{13:-1}) -- {a:-b} means a cols, degree b
-S = ZZ[x0,x1,x2]
+S = QQ[x0,x1,x2]
 
-T = id_()
+B = matrix({
+    {0,x0,0,0,0,0,0,0,0,0,0,0,x1},
+    {-x0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,x2},
+    {-x1,0,0,0,0,0,0,0,0,0,0,-x2,0}
+    })
 
-T = sub(T, S)
-B=T-transpose T
+assert(B + transpose(B) == 0)
 
 B0 = sub(sub(sub(sub(B, x1=>0), x2=>0), x0=>1), QQ)
-B1 = sub(sub(sub(sub(B, x0=>0), x2=>0), x1=>1), QQ) * 0
-B2 = sub(sub(sub(sub(B, x1=>0), x0=>0), x2=>1), QQ) * 0
+B1 = sub(sub(sub(sub(B, x0=>0), x2=>0), x1=>1), QQ)
+B2 = sub(sub(sub(sub(B, x1=>0), x0=>0), x2=>1), QQ)
 
 R = QQ[b, a_0..a_41]
 eqM = matrix{
-    {0,0,0,0,0,0,a_0, a_1, a_2, a_3, a_4, a_5, a_6 },
-    {0,0,0,0,0,0,a_7, a_8, a_9, a_10,a_11,a_12,a_13},
-    {0,0,0,0,0,0,a_14,a_15,a_16,a_17,a_18,a_19,a_20},
-    {0,0,0,0,0,0,a_21,a_22,a_23,a_24,a_25,a_26,a_27},
-    {0,0,0,0,0,0,a_28,a_29,a_30,a_31,a_32,a_33,a_34},
-    {0,0,0,0,0,0,a_35,a_36,a_37,a_38,a_39,a_40,a_41}
+    {1,0,0,0,0,0,a_0, a_1, a_2, a_3, a_4, a_5, a_6 },
+    {0,1,0,0,0,0,a_7, a_8, a_9, a_10,a_11,a_12,a_13},
+    {0,0,1,0,0,0,a_14,a_15,a_16,a_17,a_18,a_19,a_20},
+    {0,0,0,1,0,0,a_21,a_22,a_23,a_24,a_25,a_26,a_27},
+    {0,0,0,0,1,0,a_28,a_29,a_30,a_31,a_32,a_33,a_34},
+    {0,0,0,0,0,1,a_35,a_36,a_37,a_38,a_39,a_40,a_41}
     }
 eqs = {};
 for i from 0 to 5 list
@@ -528,6 +533,8 @@ Y = substitute(X, R);
 --B=J.dd_2 -- here I lost skew symmetry of the middle matrix
 
 -- ANNES EKSEMPEL!
+
+loadPackage "ResLengthThree"
 kk=QQ[x,y,z]
 Fperp = inverseSystem(x^6+y^6+z^6)
 betti res Fperp
@@ -616,3 +623,245 @@ proc = () -> (
               );
         );
     );
+
+
+
+K = QQ[a0,a1,a2,a3,a4]
+R = K[x0,x1]
+F = a0*x0^4 + 4*a1*x0^3*x1 + 6*a2*x0^2*x1^2 + 4*a3*x0*x1^3 + a4*x1^4
+F = x0^4 + 4*x0^3*x1 + 6*x0^2*x1^2 + 4*x0*x1^3 + x1^4
+fperp = inverseSystem(F)
+A = matrix{
+        {a0,a1,a2},
+        {a1,a2,a3},
+        {a2,a3,a4}
+        }
+b = adjoint(A, R^3, R^3)
+
+
+R = QQ[x0,x1,x2, MonomialOrder => Lex];
+F = x0^2*x1^2 + x0^2*x2^2 + x1^2 * x2^2 + x0^2 * x1^1 * x2^1
+F = x0^2*x1^2 + x0^2*x2^2
+Fx0 = x1^2 + x2^2
+fperp = inverseSystem(F)
+fperpx0 = inverseSystem(Fx0)
+
+
+
+-- F binary deg 4
+
+R = QQ[a0,a1,a2,a3,a4]
+S = frac R
+A = matrix{
+    {a0,a1,a2},
+    {a1,a2,a3},
+    {a2,a3,a4}
+    }
+
+co = inverse A * det A
+
+use R
+I = co_0_2 - co_1_1
+J = ideal substitute(I,R)
+    variety J
+dim J
+degree J
+degree variety J
+dim variety J
+
+
+-- deg 4
+R = QQ[a0,a1,a2,a3,a4]
+S = frac R
+A = matrix{
+    {a0,a1,a2},
+    {a1,a2,a3},
+    {a2,a3,a4}
+    }
+
+co = inverse A * det A
+
+I = ideal (co_0_2 - co_1_1)
+J = substitute(I,R)
+pdI = primaryDecomposition J
+L = length pdI
+dim variety pdI_0
+degree variety pdI_0
+dim variety pdI_1
+degree variety pdI_1
+
+pd0 = substitute(pdI_0, R)
+pd1 = substitute(pdI_1, R)
+h = substitute(ideal det A, R)
+dim variety h
+degree variety h
+
+-- F binary deg 6
+
+R = QQ[a0,a1,a2,a3,a4,a5,a6]
+S = frac R
+A = matrix{
+    {a0,a1,a2,a3},
+    {a1,a2,a3,a4},
+    {a2,a3,a4,a5},
+    {a3,a4,a5,a6}
+    }
+
+
+co = inverse A * det A
+
+A = matrix{
+    {a0,a1,a2,a3},
+    {a1,a2,a3,a0},
+    {a2,a3,a0,a1},
+    {a3,a0,a1,a2}
+    }
+
+co = inverse A * det A
+
+
+I = ideal (co_0_2 - co_1_1, co_0_3 - co_1_2,
+        co_1_3 - co_2_2,
+    co_2_3 - co_3_2)
+J = substitute(I,R)
+pdI = primaryDecomposition J
+L = length pdI
+m = minors(3,A)
+dim variety pdI_0
+degree variety pdI_0
+dim variety pdI_1
+degree variety pdI_1
+
+pd0 = substitute(pdI_0, R)
+pd1 = substitute(pdI_1, R)
+h = substitute(ideal det A, R)
+dim variety h
+degree variety h
+
+v = variety (pd0 + h)
+dim v
+degree v
+
+v = variety (pd1 + h)
+dim v
+degree v
+
+inter0 = intersect(h, pd0)
+inter1 = intersect(h, pd1)
+dim variety ideal inter_0
+degree variety ideal inter_0
+dim variety ideal inter_1
+degree variety ideal inter_1
+
+dim J
+variety J
+degree variety J
+dim variety J
+
+-- deg 8
+R = QQ[a0,a1,a2,a3,a4,a5,a6,a7,a8]
+S = frac R
+A = matrix{
+    {a0,a1,a2,a3,a4},
+    {a1,a2,a3,a4,a5},
+    {a2,a3,a4,a5,a6},
+    {a3,a4,a5,a6,a7},
+    {a4,a5,a6,a7,a8}
+    }
+
+co = inverse A * det A
+
+I = ideal (co_0_2 - co_1_1, co_0_3 - co_1_2, co_0_4 - co_1_3,
+            co_1_3 - co_2_2, co_1_4 - co_2_3,
+            co_2_4 - co_3_3)
+J = substitute(I,R)
+pdI = primaryDecomposition J
+L = length pdI
+dim variety pdI_0
+degree variety pdI_0
+dim variety pdI_1
+degree variety pdI_1
+
+dim J
+variety J
+degree variety J
+dim variety J
+
+-- deg 10
+R = QQ[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10]
+S = frac R
+A = matrix{
+    {a0,a1,a2,a3,a4,a5},
+    {a1,a2,a3,a4,a5,a6},
+    {a2,a3,a4,a5,a6,a7},
+    {a3,a4,a5,a6,a7,a8},
+    {a4,a5,a6,a7,a8,a9},
+    {a5,a6,a7,a8,a9,a10}
+    }
+
+co = inverse A * det A;
+
+
+I = ideal (co_0_2 - co_1_1, co_0_3 - co_1_2, co_0_4 - co_1_3, co_0_5 - co_1_4,
+            co_1_3 - co_2_2, co_1_4 - co_2_3, co_1_5 - co_2_4,
+            co_2_4 - co_3_3, co_2_5 - co_3_4,
+            co_3_5 - co_4_4)
+J = substitute(I,R)
+pdI = primaryDecomposition J
+L = length pdI
+dim variety pdI_0
+degree variety pdI_0
+dim variety pdI_1
+degree variety pdI_1
+dim variety pdI_2
+degree variety pdI_2
+dim variety pdI_3
+degree variety pdI_3
+dim variety pdI_4
+degree variety pdI_4
+dim variety pdI_5
+degree variety pdI_5
+dim J
+variety J
+degree variety J
+dim variety J
+
+
+    -- deg 10
+R = QQ[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12]
+S = frac R
+A = matrix{
+    {a0,a1,a2,a3,a4,a5,a6},
+    {a1,a2,a3,a4,a5,a6,a7},
+    {a2,a3,a4,a5,a6,a7,a8},
+    {a3,a4,a5,a6,a7,a8,a9},
+    {a4,a5,a6,a7,a8,a9,a10},
+    {a5,a6,a7,a8,a9,a10,a11},
+    {a6,a7,a8,a9,a10,a11,a12}
+    }
+
+co = inverse A * det A
+
+I = ideal (co_0_2 - co_1_1, co_0_3 - co_1_2, co_0_4 - co_1_3, co_0_5 - co_1_4,
+            co_1_3 - co_2_2, co_1_4 - co_2_3, co_1_5 - co_2_4,
+            co_2_4 - co_3_3, co_2_5 - co_3_4,
+            co_3_5 - co_4_4)
+J = substitute(I,R)
+pdI = primaryDecomposition J
+L = length pdI
+dim variety pdI_0
+degree variety pdI_0
+dim variety pdI_1
+degree variety pdI_1
+dim variety pdI_2
+degree variety pdI_2
+dim variety pdI_3
+degree variety pdI_3
+dim variety pdI_4
+degree variety pdI_4
+dim variety pdI_5
+degree variety pdI_5
+
+
+-- pfaffians(2,A)
+-- Cofac = minors(2,A)
